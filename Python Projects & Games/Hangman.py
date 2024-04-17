@@ -24,48 +24,58 @@ def main():
 
 # function will generate random word from an API
 def get_random_word():
-    try:
-        # API to get a random word
-        url = "https://random-word-by-api-ninjas.p.rapidapi.com/v1/randomword"
+    # API to get a list of random words
+    url = "https://random-words5.p.rapidapi.com/getMultipleRandom"
 
-        headers = {
-            "X-RapidAPI-Key": "06432802d1msh93264aa61476401p14dc2ajsn6bb6b7f21cd5",
-            "X-RapidAPI-Host": "random-word-by-api-ninjas.p.rapidapi.com",
-        }
-        response = requests.get(url, headers=headers)
+    querystring = {"count": "50"}
 
-        if response.status_code == 200:
-            word = response.json()
-            return word["word"]
-        else:
-            sys.exit(f"Failed to get random word. Status code: {response.status_code}")
-    except requests.RequestException as e:
-        sys.exit(f"Error making API request: {e}")
+    headers = {
+        "X-RapidAPI-Key": "06432802d1msh93264aa61476401p14dc2ajsn6bb6b7f21cd5",
+        "X-RapidAPI-Host": "random-words5.p.rapidapi.com",
+    }
+    response = requests.get(url, headers=headers, params=querystring)
+
+    if response.status_code == 200:
+        words_list = response.json()
+        return words_list
+    else:
+        sys.exit(
+            f"Failed to get random word. Status code: {response.status_code}, Error Message: {response.json()['message']}"
+        )
 
 
 # Set a suitable word for the difficulty
 def set_level(level, name):
-    random_word = get_random_word()
-
-    word_length = len(random_word)
-    if (
-        (level == 1 and word_length <= 7)
-        or (level == 2 and 7 < word_length <= 10)
-        or (level == 3 and word_length > 10)
-    ):
-        print("Good Luck ! ", name)
-        start_game(random_word, level)
-    else:
-        set_level(level, name)
-
-
-def start_game(word, level):
-    print("Guess the characters")
-    print()
-    guesses = []
+    words_list = get_random_word()
 
     # number of turns depending on level
     turns = {1: 10, 2: 7, 3: 5}.get(level)
+
+    # Level difficulty
+    levels = {1: "Easy", 2: "Normal", 3: "Hard"}
+
+    for word in words_list:
+        if (
+            (level == 1 and len(word) <= 7)
+            or (level == 2 and 7 <= len(word) <= 10)
+            or (level == 3 and len(word) >= 10)
+        ):
+            if not word.isalpha():
+                pass
+
+            print(f"Good Luck {name}!")
+            print(f"Selected level {levels.get(level)}")
+            start_game(word, turns)
+            break
+        else:
+            # print(f"An unexpected error occurred, Please try again.")
+            set_level(level, name)
+
+
+def start_game(word, turns):
+    print("Guess the characters")
+    print()
+    guesses = []
 
     while turns > 0:
 
@@ -141,3 +151,17 @@ def start_game(word, level):
 
 if __name__ == "__main__":
     main()
+
+
+# import requests
+
+# url = "https://random-words5.p.rapidapi.com/getMultipleRandom"
+
+# querystring = {"count": "5"}
+
+# headers = {
+#     "X-RapidAPI-Key": "06432802d1msh93264aa61476401p14dc2ajsn6bb6b7f21cd5",
+#     "X-RapidAPI-Host": "random-words5.p.rapidapi.com",
+# }
+
+# response = requests.get(url, headers=headers, params=querystring)
